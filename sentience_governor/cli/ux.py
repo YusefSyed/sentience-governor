@@ -781,7 +781,11 @@ def _session_start_epoch(path: Path) -> Optional[float]:
             line = f.readline()
         if not line.strip():
             return None
-        ts = json.loads(line).get("timestamp_utc")
+        event = json.loads(line)
+        if not isinstance(event, dict):
+            # Valid JSON but not an event object (e.g. `[]`, `null`).
+            return None
+        ts = event.get("timestamp_utc")
         if not ts:
             return None
         return datetime.fromisoformat(str(ts).replace("Z", "+00:00")).timestamp()
